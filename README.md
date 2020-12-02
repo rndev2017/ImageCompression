@@ -1,2 +1,11 @@
-# ImageCompression
-Implementing Singular Value Decomposition for image compression.  Part of my unique University of Michigan Math 214 Final Project which explored the application of linear algebra in the real world.
+# Image Compression Using Singular Value Decomposition
+
+## Why is image compression so important?
+
+## What is Singular Value Decomposition (SVD)?
+
+## How does singular value decomposition apply to image compression?
+
+## How do I use this software?
+
+## Results & Conclusions
