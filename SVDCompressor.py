@@ -9,6 +9,7 @@ THRESHOLD = 1e-6
 
 
 class NoImageProvided(Exception):
+    """An exception that is raised when SVDImageCompressor class is not provided an image path"""
     __cause__ = "No image path was provided"
 
 
@@ -38,6 +39,8 @@ def extract_RGB_channels(image: imageio.core.util.Array) -> np.array:
 
 
 class SVDImageCompressor:
+    """Compresses images using singular value decomposition"""
+
     def __init__(self, k: int = None, image_path: str = None):
         try:
             if image_path is not None:
@@ -46,7 +49,7 @@ class SVDImageCompressor:
                 if k is None:
                     self.__find_optimium_k()
                 else:
-                    print(f"K value initialized to {k}")
+                    print(f"Number of singular values initialized to {k}")
                     self.__k = k
             else:
                 raise NoImageProvided
@@ -54,6 +57,10 @@ class SVDImageCompressor:
             print(error.__cause__)
 
     def __find_optimium_k(self):
+        """
+        Does a binary search to find the "optimal" k value for peak image quality. Sacrifices compression ratio
+        in the process of finding this "optimal" k value
+        """
         # Open ground truth image
         ground_truth_img = imageio.imread(self.image_path)
         # Intialize binary search paramters
@@ -75,47 +82,58 @@ class SVDImageCompressor:
                 count_of_repeated_metric += 1
 
             if count_of_repeated_metric >= 3:
-                print("converged")
+                print(f"Optimal number of singular values found: {self.__k}")
                 break
 
             nrmse = new_nrmse
-            print(nrmse, count_of_repeated_metric)
 
     def __calculate_compression_ratio(self, shape: tuple):
+        """
+        :param shape: The shape of the original image as a tuple
+        :return: The compression ratio as computed using sizes of compressed image and original image
+        """
         uncompressed_num_pixels = shape[0] * shape[1]
         compressed_num_pixels = (shape[0] * self.__k) + self.__k + (self.__k * shape[1])
 
         return uncompressed_num_pixels / compressed_num_pixels
 
-    def SVD(self, channel: np.array):
+    def __SVD(self, channel: np.array):
+        """
+        :param channel: A matrix corresponding to one of 3 color channels (R, G, B)
+        :return: The compressed image of a color channel (R, G, or B)
+        """
         U, sigma, V = np.linalg.svd(channel.copy())
         compressed = np.dot(U[:, :self.__k], np.dot(np.diag(sigma[:self.__k]), V[:self.__k, :]))
         return compressed
 
-    def compress(self, verbose: bool = False):
+    def compress(self, output_path: str = None, verbose: bool = False):
+        """
+        Compresses the image and stores that image in a user provided output directory. If verbose is true
+        then compression metrics will be computed and outputed
+        :param output_path: The output directory in which the compressed file should be saved in
+        :param verbose: Whether or not to display compression metrics
+        :return: The compressed image as a matrix
+        """
         # Read image
         image = imageio.imread(self.image_path)
         # Copy original image and get layers
         img_layers = np.zeros(image.shape)
         for i in range(3):
-            img_layers[:, :, i] = self.SVD(image[:, :, i]).astype(np.uint8)
-        # Displays metrics and saves images
-        if verbose:
-            # Image paths
-            og_path = f"images/{self.image_name}.jpg"
-            compress_path = f"compressed_images/{self.image_name}-{self.__k}.jpg"
+            img_layers[:, :, i] = self.__SVD(image[:, :, i]).astype(np.uint8)
+
+        if output_path is not None:
+            # If the directory doesn't exist create it
+            if not os.path.isdir(output_path[:output_path.rfind("/")]):
+                os.mkdir(output_path[:output_path.rfind("/")])
             # Save image
             result = Image.fromarray(img_layers.astype(np.uint8))
-            result.save(compress_path)
+            result.save(output_path)
+        if verbose:
             # Calculate compression metrics
             compression_ratio = self.__calculate_compression_ratio(image.shape)
             print(f"Compression Ratio: {compression_ratio}")
-            print(f"Original file size: {os.path.getsize(og_path) / 1000} kB")
-            print(f"Compressed file image: {os.path.getsize(compress_path) / 1000} kB")
-            # Save Figure with Annotations
-            plt.title(f"{os.path.getsize(compress_path) / 1000} kB (k={self.__k})")
-            plt.imshow(img_layers.astype(np.uint8))
-            plt.savefig(f"compressed_images/{self.image_name}-{self.__k}.jpg")
+            print(f"Original file size: {os.path.getsize(self.image_path) / 1000} kB")
+            print(f"Compressed file image: {os.path.getsize(output_path) / 1000} kB")
 
         return img_layers.astype(np.uint8)
 
