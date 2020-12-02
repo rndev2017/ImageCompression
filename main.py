@@ -13,33 +13,6 @@ class IncorrectImageFormatException(Exception):
     __cause__ = ".jpg or jpeg file suffix was expected"
 
 
-def get_all_possible_compressed_images(step: int, total: int, image_path: str):
-    """
-    Compresses the ground truth image total times and increments by step
-    :param step: The number of singular values we should skip by
-    :param total: The total number of singular value possible
-    :param image_path: The path to the ground truth image
-    """
-    k = step
-    compressor = SVDImageCompressor(k=k, image_path=image_path)
-    while k < total:
-        compressor.compress(output_path=f"compressed_images/{compressor.image_name}-{k}.jpg", verbose=True)
-        k += step
-        compressor.k = k
-
-
-def display_original_image(image_path: str):
-    """
-    Creates a Matplotlib Plot of the Original Image with its file size
-    :param image_path: The path of the input image (ground truth image)
-    """
-    image = imageio.imread(image_path)
-    title = f"Original Image {os.path.getsize(image_path) / 1000} kB"
-    plt.title(title)
-    plt.imshow(image)
-    plt.savefig("compressed_images/og_image.jpg")
-
-
 def main(input_path: str, output_path: str, k: int, verbose: bool):
     """
     Retrieves the path to an .jpg image file and compresses

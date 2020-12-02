@@ -15,6 +15,10 @@ class NoImageProvided(Exception):
     __cause__ = "No image path was provided"
 
 
+class InvalidRankProvidedException(Exception):
+    __cause__ = "The rank or number of singular value used is less or equal to 0"
+
+
 def show_distinct_channels(image_path: str):
     rgb_channels = extract_RGB_channels(imageio.imread(image_path))
     img_name = image_path[image_path.find("/") + 1:image_path.find(".")]
@@ -49,7 +53,8 @@ class SVDImageCompressor:
                 self.image_path = image_path
                 self.image_name = self.image_path[self.image_path.find("/") + 1:self.image_path.find(".")]
                 if k is None:
-                    self.__find_optimium_k()
+                    self.__k = 1
+                    raise InvalidRankProvidedException
                 else:
                     print(f"Number of singular values initialized to {k}")
                     self.__k = k
@@ -57,37 +62,9 @@ class SVDImageCompressor:
                 raise NoImageProvided
         except NoImageProvided as error:
             print(error.__cause__)
-
-    def __find_optimium_k(self):
-        """
-        Does a binary search to find the "optimal" k value for peak image quality. Sacrifices compression ratio
-        in the process of finding this "optimal" k value
-        """
-        # Open ground truth image
-        ground_truth_img = imageio.imread(self.image_path)
-        # Intialize binary search paramters
-        range_of_k = [1, ground_truth_img.shape[0]]
-        self.__k = 1
-        count_of_repeated_metric = 0
-        # Compress image with start parameters
-        compress_img = self.compress()
-        nrmse = normalized_root_mse(ground_truth_img, compress_img)
-        while nrmse > THRESHOLD:
-            self.__k = int(0.5 * (range_of_k[0] + range_of_k[1]))
-            compress_img = self.compress()
-            new_nrmse = normalized_root_mse(ground_truth_img, compress_img)
-            if new_nrmse > nrmse:
-                range_of_k[1] = self.__k
-            else:
-                range_of_k[0] = self.__k
-            if math.fabs(new_nrmse - nrmse) < THRESHOLD and count_of_repeated_metric <= 3:
-                count_of_repeated_metric += 1
-
-            if count_of_repeated_metric >= 3:
-                print(f"Optimal number of singular values found: {self.__k}")
-                break
-
-            nrmse = new_nrmse
+        except InvalidRankProvidedException as error:
+            print(error.__cause__)
+            print(f"Automatically set number of singular values to {self.__k}")
 
     def __calculate_compression_ratio(self, shape: tuple):
         """
@@ -133,10 +110,10 @@ class SVDImageCompressor:
         if verbose:
             # Calculate compression metrics
             compression_ratio = self.__calculate_compression_ratio(image.shape)
+            print(f"Current rank: {self.__k}")
             print(f"Compression Ratio: {compression_ratio}")
             print(f"Original file size: {os.path.getsize(self.image_path) / 1000} kB")
             print(f"Compressed file image: {os.path.getsize(output_path) / 1000} kB")
-
         return img_layers.astype(np.uint8)
 
     @property
