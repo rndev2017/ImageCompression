@@ -1,9 +1,10 @@
+import math
+import os
+
+import imageio
+import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
-import matplotlib.pyplot as plt
-import imageio
-import os
-import math
 from skimage.metrics import normalized_root_mse
 
 THRESHOLD = 1e-6

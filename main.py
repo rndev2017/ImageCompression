@@ -1,7 +1,10 @@
-import argparse, imageio
-from SVDCompressor import SVDImageCompressor
-import matplotlib.pyplot as plt
+import argparse
+import imageio
 import os
+
+import matplotlib.pyplot as plt
+
+from SVDCompressor import SVDImageCompressor
 
 ACCEPTABLE_FILE_FORMATS = ["jpg", "jpeg"]
 
@@ -63,7 +66,7 @@ if __name__ == '__main__':
     try:
         # I/O Checks
         input_path = args.input
-        file_format = input_path[input_path.find(".")+1:]
+        file_format = input_path[input_path.find(".") + 1:]
         if os.path.isfile(input_path):
             if file_format in ACCEPTABLE_FILE_FORMATS:
                 num_singular_values = args.k if args.k > 0 else None
@@ -76,4 +79,3 @@ if __name__ == '__main__':
             raise FileNotFoundError(f"{input_path} does not exist")
     except FileNotFoundError as error:
         print(error)
-
