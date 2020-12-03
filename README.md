@@ -3,17 +3,6 @@
 ## Why is image compression so important?
 Firstly, what is image compression? Image compression is an application of data compression that is used to minimize redundancy in an image, thereby reducing the amount of data/information it hold, thus minimizing the file sizes. An effecient image compression algorithm is certainly behenficial for an era where sharing and accessing images and other media files are commonplace [1.8 billion photos are added to social media platforms **daily**.](https://www.businessinsider.com/were-now-posting-a-staggering-18-billion-photos-to-social-media-every-day-2014-5) For our MATH 214 Final Project, we wanted to delve into understanding the basics of image compression with a simple algorithm known as singular value decomposition or SVD which has its foundations in linear algebra that we have learned throughout this semester. 
 
-## What is Singular Value Decomposition (SVD)?
-Before discussing singular value decomposition, we should understand some of the foundational linear algebra and theory that goes into this. For this we need to understand matrices, linear transformations or maps, eigenvalues and corresponding eigenvectors.
-
-### Matrices
-
-### Matrices as Linear Transformations
-
-### Eigenvalues and Eigenvectors
-
-## How does singular value decomposition apply to image compression?
-
 ## How do I use this software?
 This project is built entirely with the Python programming langugage and uses a number of scientific libraries that should be installed before using otherwise the code won't work on your machine. I won't go over how to install Python here, but here is a [resource](https://realpython.com/installing-python/) that might help! This program is designed to run completely through the command line so you don't have to deal with any code.
 
@@ -37,12 +26,11 @@ This project comes with 3 test images in the [images/](https://github.com/rndev2
 python main.py -i [LOCATION OF UNCOMPRESSED IMAGE] -o [LOCATION WHERE COMPRESSED IMAGE SHOULD BE SAVED] -k [INTEGER GREATER THAN 0 AND LESS THAN THE WIDTH OF IMAGE IN PIXELS] -v [0 OR 1]
 ```
 
-This should run the program with the specific input that you give it. If it seems like its hung, its probably because you inputed a really large images and its taking a while to crunch the numbers. Be patient, if it doesn't work after a while, try resizing the image so that its smaller and easier to work with. If you have issues where it takes a while, create an issue on Github and I'll take a look at it and see how to fix it. If your more interested in the code, you can take a look. The code files are set up for basic functionality: it will compress your desired image given the number of singular values you give it. There are some functions that are not used when you run the program that you can look at and mess around with. 
+This should run the program with the specific input that you give it. If it seems like its hung, its probably because you inputed a really large image and its taking a while to crunch the numbers. Be patient, if it doesn't work after a while, try resizing the image so that its smaller and easier to work with. If you have issues where it takes a while, create an issue on Github and I'll take a look at it and see how to fix it. The code files are set up for basic functionality: it will compress your desired image given the number of singular values you give it. There are some functions that are not used when you run the program that you can look at and mess around with. 
 
 ## Results
-<figure width="100%">
+Here is a GIF where you can observe the increase in quality of the compressed image as the number of singular values are used increases. Additionally, you can also see the file size of the image change as the number of singular values increase
+
+<p align="center">
   <img src="https://github.com/rndev2017/ImageCompression/blob/master/compressed_images/bird.gif" alt="Bird Compressed GIF" style="width:100%">
-  <figcaption>Image quality & file size as number of singular values increases</figcaption>
-</figure>
-
-
+</p>
